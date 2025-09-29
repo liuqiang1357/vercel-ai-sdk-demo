@@ -1,10 +1,9 @@
-import { openai } from "@ai-sdk/openai";
+import { deepseek } from "@ai-sdk/deepseek";
 import { UIMessage, tool, stepCountIs, validateUIMessages } from "ai";
 import {
   Experimental_Agent as Agent,
   Experimental_InferAgentUIMessage as InferAgentUIMessage,
 } from "ai";
-
 import { z } from "zod";
 import { tavily } from "@tavily/core";
 
@@ -14,19 +13,8 @@ export const getCurrentTime = tool({
   description: "Get the current date and time in UTC",
   inputSchema: z.object({}),
   execute: async () => {
-    const now = new Date();
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth() + 1;
-    const day = now.getUTCDate();
-    const hour = now.getUTCHours();
-    const minute = now.getUTCMinutes();
-
     return {
-      current_time: `${year}-${month.toString().padStart(2, "0")}-${day
-        .toString()
-        .padStart(2, "0")} ${hour.toString().padStart(2, "0")}:${minute
-        .toString()
-        .padStart(2, "0")} UTC`,
+      current_time: new Date().toISOString(),
     };
   },
 });
@@ -53,12 +41,12 @@ export const webSearch = tool({
 
 const systemPrompt = `
 你是Cypher，一个Web3 AI代理，擅长预测各种代币的价格并给出预测的依据。
-预测之前先使用工具获取当前时间，获得当前时间之后再基于当前时间搜索最新相关信息，最后基于当前时间和最新相关信息给出预测。
+预测之前先使用工具获取当前时间（每一轮都重新获取），然后再基于当前时间搜索最新相关信息，最后基于当前时间和最新相关信息给出预测。
 回答的语言以用户最新提问的语言为准。
 `;
 
 export const myAgent = new Agent({
-  model: openai("gpt-4o"),
+  model: deepseek("deepseek-chat"),
   system: systemPrompt,
   tools: {
     webSearch,
