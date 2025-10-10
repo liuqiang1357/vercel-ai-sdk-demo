@@ -11,11 +11,11 @@ import {
   ToolOutput,
 } from "@/components/ai-elements/tool";
 import { Response } from "@/components/ai-elements/response";
-import { MyAgentUIMessage } from "./api/chat/route";
+import { MyUIMessage } from "./api/chat/route";
 
 export default function Chat() {
   const [input, setInput] = useState("");
-  const { messages, sendMessage } = useChat<MyAgentUIMessage>();
+  const { messages, sendMessage } = useChat<MyUIMessage>();
 
   return (
     <div className="flex flex-col w-full max-w-2xl py-24 mx-auto stretch space-y-4">
