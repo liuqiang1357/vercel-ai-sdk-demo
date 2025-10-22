@@ -6,21 +6,12 @@ import {
   streamText,
   convertToModelMessages,
   InferUITools,
+  UIDataTypes,
 } from "ai";
 import { z } from "zod";
 import { tavily } from "@tavily/core";
 
 export const maxDuration = 30;
-
-export const getCurrentTime = tool({
-  description: "Get the current date and time in UTC",
-  inputSchema: z.object({}),
-  execute: async () => {
-    return {
-      current_time: new Date().toISOString(),
-    };
-  },
-});
 
 export const tavilyClient = tavily({
   apiKey: process.env.TAVILY_API_KEY,
@@ -44,20 +35,30 @@ export const webSearch = tool({
 
 const tools = {
   webSearch,
-  getCurrentTime,
 };
 
-export type MyUIMessage = UIMessage<never, never, InferUITools<typeof tools>>;
-
-const systemPrompt = `
-你是Cypher，一个Web3 AI代理，擅长各种Web3相关问题，比如查询币价，预测价格等等。
-搜索之前先使用工具获取当前时间（每一轮都重新获取），然后再基于当前时间搜索最新相关信息。
-对可能缺少参数的工具，提示用户提供参数。
-分析用户最后一条消息的语言（例如中文、英文、或者其他），回答时使用用户最后一条消息的语言。
-`;
+export type MyUIMessage = UIMessage<
+  never,
+  UIDataTypes,
+  InferUITools<typeof tools>
+>;
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
+
+  const now = new Date();
+  const utcTime = now.toISOString();
+
+  const systemPrompt = `
+你是 Cypher，专注 Web3 问答。
+当前时间（UTC）：${utcTime}
+
+- 如涉价格/行情/新闻/版本等时效问题，优先用 webSearch 获取最新信息，并可引用来源与时间。
+- 语言与用户一致；先结论后理由，回答简洁、结构化。
+- 不要与当前时间矛盾；无需提及知识截止。
+
+注意：本回答不构成投资建议。
+`;
 
   const result = streamText({
     model: deepseek("deepseek-chat"),
