@@ -94,33 +94,6 @@ export default function Chat() {
                     </ToolContent>
                   </Tool>
                 );
-              case "tool-getCurrentTime":
-                return (
-                  <Tool
-                    key={`${message.id}-${i}`}
-                    defaultOpen={
-                      part.state === "output-available" ||
-                      part.state === "output-error"
-                    }
-                  >
-                    <ToolHeader type="getCurrentTime" state={part.state} />
-                    <ToolContent>
-                      <ToolInput input={part.input} />
-                       <ToolOutput
-                         output={
-                           part.output ? (
-                             <div className="bg-green-50 border border-green-200 p-3 rounded">
-                               <div className="text-lg font-semibold text-green-900">
-                                 🕐 {part.output.current_time}
-                               </div>
-                             </div>
-                           ) : undefined
-                         }
-                        errorText={part.errorText}
-                      />
-                    </ToolContent>
-                  </Tool>
-                );
               default:
                 return null;
             }

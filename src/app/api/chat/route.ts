@@ -13,16 +13,6 @@ import { tavily } from "@tavily/core";
 
 export const maxDuration = 30;
 
-export const getCurrentTime = tool({
-  description: "Get the current date and time in UTC",
-  inputSchema: z.object({}),
-  execute: async () => {
-    return {
-      current_time: new Date().toISOString(),
-    };
-  },
-});
-
 export const tavilyClient = tavily({
   apiKey: process.env.TAVILY_API_KEY,
 });
@@ -45,7 +35,6 @@ export const webSearch = tool({
 
 const tools = {
   webSearch,
-  getCurrentTime,
 };
 
 export type MyUIMessage = UIMessage<
@@ -57,10 +46,12 @@ export type MyUIMessage = UIMessage<
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
+  const todayUtc = new Date().toISOString().slice(0, 10);
+
   const systemPrompt = `
 你是 Cypher，专业的 Web3 知识助手。
 
-当需要最新信息时，请先获取当前时间，然后搜索最新数据。提供简洁、结构化的回答。
+今天是 UTC 时间 ${todayUtc}。当需要最新信息时，请基于当前时间（而不是知识截止时间）使用网络搜索工具。提供简洁、结构化的回答。
 
 投资有风险，决策需谨慎。
 `;
