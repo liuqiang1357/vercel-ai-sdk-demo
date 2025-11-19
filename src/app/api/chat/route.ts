@@ -1,4 +1,5 @@
 import { deepseek } from "@ai-sdk/deepseek";
+import { format} from "date-fns";
 import {
   UIMessage,
   tool,
@@ -46,14 +47,12 @@ export type MyUIMessage = UIMessage<
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
 
-  const todayUtc = new Date().toISOString().slice(0, 10);
+  const now = format(new Date(), "yyyy-MM-dd HH:mm:ss")
 
   const systemPrompt = `
 你是 Cypher，专业的 Web3 知识助手。
 
-今天是 UTC 时间 ${todayUtc}。当需要最新信息时，请基于当前时间（而不是知识截止时间）使用网络搜索工具。提供简洁、结构化的回答。
-
-投资有风险，决策需谨慎。
+当前是 UTC 时间 ${now}，需要最新信息时，请基于当前时间（而非知识截止时间）使用搜索工具。
 `;
 
   const result = streamText({
